@@ -8,7 +8,7 @@ from colorama import Back, Fore, Style, deinit, init
 from random import randint
 import random
 
-
+#test
 #Fonction grille
 def initialiser_grille():
     tailleGrillei = random.randint(9, 19)
