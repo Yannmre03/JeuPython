@@ -139,10 +139,3 @@ GrilleV1 = [[""]*tailleGrillej for _ in range(tailleGrillei)]
 GrilleV1[random.randint(0,tailleGrillei)][random.randint(0,tailleGrillej)] = "J" #on place le joueur
 
 tailleSituation = int(0.025*tailleGrillej*tailleGrillei)
-placement = [""]
-for i in range(tailleSituation):
-    while True:
-        if GrilleV1[random.randint(0,tailleGrillei):
-def initaliser_grille():
-        ma_grille = [[""]*20 for _ in range(10)]
-        return ma_grille

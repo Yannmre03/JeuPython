@@ -14,11 +14,11 @@ def initialiser_grille():
     tailleGrillei = random.randint(9, 19)
 
     tailleGrillej = random.randint(19, 39)
-    GrilleJoueur = [["X"] * (tailleGrillej) for _ in range(tailleGrillei)]
+    GrilleJoueur = [[(Back.BLACK + " " + Style.RESET_ALL)] * (tailleGrillej) for _ in range(tailleGrillei)]
     positionJoueur = [random.randint(0,tailleGrillei-1), random.randint(0,tailleGrillej-1)]
-    GrilleJoueur[positionJoueur[0]][positionJoueur[1]] = "J" #on place le joueur
+    GrilleJoueur[positionJoueur[0]][positionJoueur[1]] = (Fore.RED + "▲" + Style.RESET_ALL) #on place le joueur
     GrilleV1 = [[""] * tailleGrillej for _ in range(tailleGrillei)]
-    GrilleV1[random.randint(0,tailleGrillei-1)][random.randint(0,tailleGrillej-1)] = "J" #on place le joueur
+    GrilleV1[positionJoueur[0]][positionJoueur[1]] =  (Fore.RED + "▲" + Style.RESET_ALL) #on place le joueur
     tailleSituation = int(0.025*tailleGrillej*tailleGrillei)
     tailleMur = int(0.1*tailleGrillej*tailleGrillei)
     for i in range(tailleSituation): #positifs
@@ -52,15 +52,15 @@ def initialiser_grille():
 
 
 def afficher_grille(ma_grille):
-    print("┌" + "───┬" * (len(ma_grille[0]) - 1) + "───┐")
+    print((Fore.BLUE+"┌"+Style.RESET_ALL) + (Fore.BLUE+"───┬"+Style.RESET_ALL) * (len(ma_grille[0]) - 1) + (Fore.BLUE+"───┐"+Style.RESET_ALL))
     for i, ligne in enumerate(ma_grille):
         if i != 0:
-            print("├" + "───┼" * (len(ligne) - 1) + "───┤")
+            print((Fore.BLUE+"├"+ Style.RESET_ALL) + (Fore.BLUE+"───┼"+ Style.RESET_ALL) * (len(ligne) - 1) + (Fore.BLUE+"───┤"+Style.RESET_ALL))
         for valeur in ligne:
-            print("│ " + valeur + " ", end="")
+            print((Fore.BLUE+"│ "+Style.RESET_ALL) + valeur + " ", end="")
 
-        print("│")
-    print("└" + "───┴" * (len(ligne) - 1) + "───┘")
+        print(Fore.BLUE+"│"+Style.RESET_ALL)
+    print((Fore.BLUE+"└")+(Fore.BLUE+"───┴"+Style.RESET_ALL) * (len(ligne) - 1) + (Fore.BLUE+"───┘"+Style.RESET_ALL))
 
 def afficher_accueil():
     print("Bienvenue dans le jeu !")
@@ -90,63 +90,122 @@ def afficher_jeu():
     afficher_grille(grilleJ)
     print("Score actuel : [score]")
     print("Indications pour le joueur")
-    print("afficher jeu")
     return grilleJ, GrilleAdmin, posJoueur, tailleI, tailleJ
 
-def handle_player_movement(player_position, orientation, grilleAdminF, grilleJoueurF, tailleIF,tailleJF):
-    while True:
-        print("inwhile")
-        key_pressed = readchar.readkey()
-        print(key_pressed)
-        print("ok")
-        if (key_pressed == "i" or key_pressed == "8") and orientation == "i" and player_position[0] > 0 :
-            if grilleAdminF[player_position[0]-1][player_position[1]] == "M":
-                print("Attention un mur")
+
+def handle_player_movement(player_position, orientation, grilleAdminF, grilleJoueurF, tailleIF, tailleJF, IsSituation):
+    key_pressed = input("choix i,j,k,l")
+    print(key_pressed)
+    IsMur = False
+    OnSituationPos = False
+    OnSituationNeg = False
+    if key_pressed == orientation:
+        # déplacement
+        if key_pressed == "i" and player_position[0] > 0 :
+            if grilleAdminF[player_position[0] - 1][player_position[1]] == "M":
+                IsMur = True
             else:
-                player_position = [player_position[0]-1, player_position[1]]
-                break
-        elif (key_pressed == "j" or key_pressed == "4")and orientation == "j" and player_position[1] > 0:
-            if grilleAdminF[player_position[0]][player_position[1]-1] == "M":
-                print("Attention un mur")
+                if grilleAdminF[player_position[0]-1][player_position[1]] == "S":#distinction in et on
+                    OnSituationPos = True
+                    print("situation jouée")
+                elif grilleAdminF[player_position[0]-1][player_position[1]] == "N":
+                    OnSituationNeg = True
+                player_position = [player_position[0] - 1, player_position[1]]
+                grilleJoueurF[player_position[0]][player_position[1]] = (Fore.RED + "▲")
+                grilleJoueurF[player_position[0] + 1][player_position[1]] = " "
+                grilleAdminF[player_position[0]][player_position[1]] = (Fore.RED + "▲")
+                grilleAdminF[player_position[0] + 1][player_position[1]] = " "
+
+        elif key_pressed == "j" and player_position[1] > 0:
+            if grilleAdminF[player_position[0]][player_position[1] - 1] == "M":
+                IsMur = True
             else:
-                player_position = [player_position[0], player_position[1]-1]
-                break
-        elif (key_pressed == "k" or key_pressed == "5" or key_pressed == "2") and orientation == "k" and player_position[0] < tailleIF:
-            if grilleAdminF[player_position[0]+1][player_position[1]] == "M":
-                print("Attention un mur")
+                if grilleAdminF[player_position[0]][player_position[1]-1] == "S":  # distinction in et on
+                    OnSituationPos = True
+                    print("situation jouée")
+                elif grilleAdminF[player_position[0]][player_position[1]-1] == "N":
+                    OnSituationNeg = True
+                player_position = [player_position[0], player_position[1] - 1]
+                grilleJoueurF[player_position[0]][player_position[1]] = (Fore.RED + "◄")
+                grilleJoueurF[player_position[0]][player_position[1] + 1] = " "
+                grilleAdminF[player_position[0]][player_position[1]] = (Fore.RED + "◄")
+                grilleAdminF[player_position[0]][player_position[1] + 1] = " "
+
+
+        elif key_pressed == "k" and player_position[0] < tailleIF-1:
+            if grilleAdminF[player_position[0] + 1][player_position[1]] == "M":
+                IsMur = True
             else:
-                player_position = [player_position[0]+1, player_position[1]]
-                break
-        elif (key_pressed == "l" or key_pressed == "6") and orientation == "l" and player_position[0] < tailleJF:
-            if grilleAdminF[player_position[0]][player_position[1]+1] == "M":
-                print("Attention un mur")
+                if grilleAdminF[player_position[0]+1][player_position[1]] == "S":  # distinction in et on
+                    OnSituationPos = True
+                    print("situation jouée")
+                elif grilleAdminF[player_position[0]+1][player_position[1]] == "N":
+                    OnSituationNeg = True
+                player_position = [player_position[0] + 1, player_position[1]]
+                grilleJoueurF[player_position[0]][player_position[1]] = (Fore.RED + "▼")
+                grilleJoueurF[player_position[0] - 1][player_position[1]] = " "
+                grilleAdminF[player_position[0]][player_position[1]] = (Fore.RED + "▼")
+                grilleAdminF[player_position[0] - 1][player_position[1]] = " "
+
+
+        elif key_pressed == "l" and player_position[1] < tailleJF:
+            if grilleAdminF[player_position[0]][player_position[1] + 1] == "M":
+                IsMur = True
             else:
-                player_position = [player_position[0], player_position[1]+1]
-                break
-        elif key_pressed == "i":
-            orientation = "i"
-            if grilleAdminF[player_position[0]-1][player_position[1]] == "P" or grilleAdminF[player_position[0]-1][player_position[1]] == "N" :
-                #change la couleur du joueur
-                print("attention, vou etes en face d'une situation")
+                if grilleAdminF[player_position[0]][player_position[1]+1] == "S":  # distinction in et on
+                    OnSituationPos = True
+                    print("situation jouée")
+                elif grilleAdminF[player_position[0]][player_position[1]+1] == "N":
+                    OnSituationNeg = True
+                player_position = [player_position[0], player_position[1] + 1]
+                grilleJoueurF[player_position[0]][player_position[1]] = (Fore.RED + "►")
+                grilleJoueurF[player_position[0]][player_position[1] - 1] = " "
+                grilleAdminF[player_position[0]][player_position[1]] = (Fore.RED + "►")
+                grilleAdminF[player_position[0]][player_position[1] - 1] = " "
+
+    # orientation
+    else:
+        if key_pressed == "i":
+            grilleAdminF[player_position[0]][player_position[1]] = (Fore.RED + "▲")
+            grilleJoueurF[player_position[0]][player_position[1]] = (Fore.RED + "▲")
+            if grilleAdminF[player_position[0] - 1][player_position[1]] == "P" or grilleAdminF[player_position[0] - 1][
+                player_position[1]] == "N":
+                # change la couleur du joueur
+
+                IsSituation = True
+            else:
+                IsSituation = False
+
         elif key_pressed == "j":
-            orientation = "j"
-            if grilleAdminF[player_position[0]][player_position[1]-1] == "P" or grilleAdminF[player_position[0]][player_position[1]-1] == "N":
+            grilleAdminF[player_position[0]][player_position[1]] =(Fore.RED +"◄")
+            grilleJoueurF[player_position[0]][player_position[1]] = (Fore.RED +"◄")
+            if grilleAdminF[player_position[0]][player_position[1] - 1] == "P" or grilleAdminF[player_position[0]][
+                player_position[1] - 1] == "N":
                 # change la couleur du joueur
-                print("attention, vou etes en face d'une situation")
+                IsSituation = True
+            else:
+                IsSituation = False
+
         elif key_pressed == "k":
-            orientation = "k"
-            if grilleAdminF[player_position[0]+1][player_position[1]] == "P" or grilleAdminF[player_position[0]+1][player_position[1]] == "N":
+            grilleAdminF[player_position[0]][player_position[1]] = (Fore.RED + "▼")
+            grilleJoueurF[player_position[0]][player_position[1]] = (Fore.RED + "▼")
+            if grilleAdminF[player_position[0] + 1][player_position[1]] == "P" or grilleAdminF[player_position[0] + 1][
+                player_position[1]] == "N":
                 # change la couleur du joueur
-                print("attention, vou etes en face d'une situation")
+                IsSituation = True
+            else:
+                IsSituation = False
         elif key_pressed == "l":
-            orientation = "l"
-            if grilleAdminF[player_position[0]][player_position[1]+1] == "P" or grilleAdminF[player_position[0]][player_position[1]+1] == "N":
+            grilleAdminF[player_position[0]][player_position[1]] = (Fore.RED + "►")
+            grilleJoueurF[player_position[0]][player_position[1]] = (Fore.RED + "►")
+            if grilleAdminF[player_position[0]][player_position[1] + 1] == "P" or grilleAdminF[player_position[0]][
+                player_position[1] + 1] == "N":
                 # change la couleur du joueur
-                print("attention, vou etes en face d'une situation")
-    print("outwhile")
-    return player_position, orientation
-
-
+                IsSituation = True
+            else:
+                IsSituation = False
+    orientation = key_pressed
+    return player_position, orientation, grilleJoueurF, grilleAdminF, IsSituation, IsMur, OnSituationPos, OnSituationNeg
 #FONCTIONS STOCKAGE
 
 #fonctionOpenCSV: ouvrir un fichier csv et stocker son contenu
@@ -154,13 +213,20 @@ def handle_player_movement(player_position, orientation, grilleAdminF, grilleJou
     #sortie: variable avec le contenu (liste 1,2,3 ou ...n dimensions je crois dépendant du nombre de colonnes)
 import csv
 
-def fonction_open_csv(nom_fichier):
-    contenu = []
-    with open(nom_fichier, newline='') as csvfile:
+def fonction_open_csv():
+    contenu  = []
+    positive = []
+    negative = []
+    with open("Situations.csv", newline='') as csvfile:
         reader = csv.reader(csvfile)
         for row in reader:
             contenu.append(row)
-    return contenu
+        for i in range(len(contenu)):
+            if contenu[i][0] == "Positive":
+                positive.append(contenu[i][1:-1])
+            if contenu[i][0] == "Negative":
+                negative.append(contenu[i][1:-1])
+    return positive, negative
 ## appel : contenu = fonction_open_csv('exemple.csv')
 
 #fonctionOpenJSON: ouvrir un fichier json et stocker son contenu
@@ -180,7 +246,7 @@ def fonction_open_json(nom_fichier):
     # variable avec contenu organisé à stocker (liste)
     #sortie: aucune (ou bool réussit ou non)
 
-import csv
+
 
 def fonction_save_csv(nom_fichier, contenu):
     try:
@@ -206,7 +272,6 @@ def SelectionChoix(choix):
     while True:
         if choix == "1":
             grilleJ2, GrilleAdmin2, posJoueur2, tailleI1, tailleJ1 = afficher_jeu()
-            print("selectionchoix")
             return grilleJ2, GrilleAdmin2, posJoueur2, tailleI1, tailleJ1
 
         elif choix == "2":
@@ -221,9 +286,29 @@ def fonctionPrincipale():
     afficher_accueil()
     choixP =afficher_menu()
     grilleJoueurG, GrilleAdminG, posJoueurG, tailleIG, tailleJG = SelectionChoix(choixP)
-    orientationG = "" #par défaut orienté vers le haut
-    print("ok")
-    posJoueurG, orientationG = handle_player_movement(posJoueurG, orientationG, GrilleAdminG, grilleJoueurG, tailleIG,tailleJG )
-    afficher_grille(GrilleAdminG)
+    orientationG = "i" #par défaut orienté vers le haut
+    SituationBool = False
+    while True:
+        print(posJoueurG)
+        posJoueurG, orientationG, grilleJoueurG, GrilleAdminG,SituationBool, MurBool,OnSituationPosG,OnSituationNegG = handle_player_movement(posJoueurG, orientationG, GrilleAdminG, grilleJoueurG, tailleIG,tailleJG, SituationBool )
+        afficher_grille(GrilleAdminG)
+        if SituationBool:
+            print("en face d'une situation")
+        if MurBool:
+            print("attention un mur")
+        pos, neg = fonction_open_csv()
+        if OnSituationPosG:
+            randomInt = randint(0, len(pos)-1)
+            print("Situation positive: "+pos[randomInt][0])
+            print("Contenu de la situation: "+ pos[randomInt][1])
+            print("points obtenus: "+ pos[randomInt][2])
+            input("cliquez sur entrez: ")
+        elif OnSituationNegG:
+            randomInt = randint(0, len(neg) - 1)
+            print("Situation négative: " + neg[randomInt][0])
+            print("Contenu de la situation: " + neg[randomInt][1])
+            print("points peruds: " + neg[randomInt][2])
+            input("cliquez sur entrez: ")
+
 
 fonctionPrincipale()
