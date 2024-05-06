@@ -11,9 +11,9 @@ def fonction_open_csv():
             contenu.append(row)
         for i in range(len(contenu)):
             if contenu[i][0] == "Positive":
-                positive.append(contenu[i][1:-1])
+                positive.append(contenu[i])
             if contenu[i][0] == "Negative":
                 negative.append(contenu[i][1:-1])
     return positive, negative
 pos, neg = fonction_open_csv()
-print(pos)
+print(pos[0])

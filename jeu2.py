@@ -69,8 +69,10 @@ def afficher_accueil():
 def afficher_menu():
     print("Menu principal :")
     print("1. Jouer")
-    print("2. Voir les règles")
-    print("3. Quitter")
+    print("2. Continuer une partie")
+    print("3. Voir les règles")
+    print("4. Tableau des scores")
+    print("5. Quitter")
 
 
 def afficher_regles():
@@ -269,31 +271,57 @@ def fonction_open_csv():
                 negative.append(contenu[i][1:-1])
     return positive, negative
 
-def fonction_open_json(nom_fichier):
-    with open(nom_fichier, 'r') as json_file:
-        contenu = json.load(json_file)
-    return contenu
+def fonction_Sortie(nomF, ScoreF):
+    row = [nomF, ScoreF]
+    with open('Scores.csv', 'a', newline='') as csv_file:
+        writer = csv.writer(csv_file)
+        writer.writerow(row)
+    with open('PartieEnCours.csv', 'w', newline='') as csv_file:
+        pass
 
-def fonction_save_csv(nom_fichier, contenu):
-    try:
-        with open(nom_fichier, 'w', newline='') as csvfile:
-            writer = csv.writer(csvfile)
-            for row in contenu:
-                writer.writerow(row)
-        return True  # Succès de l'écriture dans le fichier
-    except Exception as e:
-        print(f"Une erreur s'est produite : {e}")
-        return False  # Échec de l'écriture dans le fichier
+def fonction_afficher_scores():
+    Scores = []
+    with open('Scores.csv', 'r', newline='') as csv_file:
+        reader = csv.reader(csv_file)
+        for row in reader:
+            Scores.append(row)
 
-def fonction_save_json(nom_fichier, contenu):
-    try:
-        with open(nom_fichier, 'w') as json_file:
-            json.dump(contenu, json_file, indent=4)
-        return True  # Succès de l'écriture dans le fichier
-    except Exception as e:
-        print(f"Une erreur s'est produite : {e}")
-        return False  # Échec de l'écriture dans le fichier
+def fonction_Quitter(GrilleA, GrilleJ, ScoreJ, pseudo, posJ, tailleI, tailleJ, HistBug):
+    GrilleA[posJ[0]][posJ[1]] = "X"
+    GrilleJ[posJ[0]][posJ[1]] = "X"
+    with open('GrilleAdmin.csv', 'w', newline='') as csv_file:
+        writer = csv.writer(csv_file)
+        for row in GrilleA:
+            writer.writerow(row)
+    with open('GrilleJoueur.csv', 'w', newline='') as csv_file:
+        writer = csv.writer(csv_file)
+        for row in GrilleJ:
+            writer.writerow(row)
+    with open('PartieEnCours.csv', 'w', newline='') as csv_file:
+        writer = csv.writer(csv_file)
+        writer.writerow([pseudo, str(ScoreJ), str(posJ[0]), str(posJ[1]), str(tailleI), str(tailleJ), HistBug])
 
+def continuerPartie():
+    Grille_admin = []
+    with open('GrilleAdmin.csv', 'r', newline='') as csv_file:
+        reader = csv.reader(csv_file)
+        for row in reader:
+            Grille_admin.append([item for item in row])
+
+    Grille_joueur = []
+    with open('GrilleJoueur.csv', 'r', newline='') as csv_file:
+        reader = csv.reader(csv_file)
+        for row in reader:
+            Grille_joueur.append([item for item in row])
+
+    DonneesPartie = []
+    with open('PartieEnCours.csv', 'r', newline='') as csv_file:
+        reader = csv.reader(csv_file)
+        for row in reader:
+            DonneesPartie.append(row)
+    Grille_joueur[int(DonneesPartie[0][2])][int(DonneesPartie[0][3])] = (Fore.RED + "▲")
+    Grille_admin[int(DonneesPartie[0][2])][int(DonneesPartie[0][3])] = (Fore.RED + "▲")
+    return Grille_joueur, Grille_admin, [int(DonneesPartie[0][2]),int(DonneesPartie[0][3])],int(DonneesPartie[0][4]), int(DonneesPartie[0][5]), DonneesPartie[0][0],int(DonneesPartie[0][1]),DonneesPartie[0][6]
 
 def SelectionChoix():
     while True:
@@ -301,33 +329,39 @@ def SelectionChoix():
         choix = input("Entrez votre choix : ")
         if choix == "1":
             grilleJ2, GrilleAdmin2, posJoueur2, tailleI1, tailleJ1 = afficher_jeu()
-            return grilleJ2, GrilleAdmin2, posJoueur2, tailleI1, tailleJ1, False
-
+            return grilleJ2, GrilleAdmin2, posJoueur2, tailleI1, tailleJ1,"", 0, False, False
         elif choix == "2":
-            afficher_regles()
+            GrilleJ2, GrilleAdmin2, posJoueur2, tailleI1, tailleJ1, nom2, Score2, HistBool = continuerPartie()
+            if HistBool == "True":
+                HistBool = True
+            else:
+                HistBool = False
+            return GrilleJ2, GrilleAdmin2, posJoueur2, tailleI1, tailleJ1, nom2, Score2, HistBool,False
         elif choix == "3":
-            return [0][0], [0][0], [0][0], 0, 0, True
+            afficher_regles()
+        elif choix == "4":
+            pass
+        elif choix == "5":
+            return [0][0], [0][0], [0][0], 0, 0, "", 0, False, True
         else:
             print("Choix invalide. Veuillez réessayer.")
 
 def fonctionPrincipale():
-    Quitter= False
-    Sortie = False
-    while True:
-        if Quitter or Sortie:
-            pass #on enregistre les scores
-        afficher_accueil()
 
-        grilleJoueurG, GrilleAdminG, posJoueurG, tailleIG, tailleJG, BoolQuitter = SelectionChoix()
+    while True:
+        afficher_accueil()
+        grilleJoueurG, GrilleAdminG, posJoueurG, tailleIG, tailleJG,nom,Score,HistDebogage, BoolQuitter = SelectionChoix()
         if BoolQuitter:
             break
-        nom = input(" entrez votre pseudo puis cliquez enter: ")
+        if nom == "":
+            nom = input(" entrez votre pseudo puis cliquez enter: ")
+            Score = 0
+        else:
+            afficher_grille(grilleJoueurG)
+            HistDebogage = False
         orientationG = "i" #par défaut orienté vers le haut
         SituationBool = False
         Debogage = False
-        HistDebogage = False
-        Relancer = False
-        Score = 0
         while True:
             print(posJoueurG)
             posJoueurG, orientationG, grilleJoueurG, GrilleAdminG,SituationBool, MurBool,OnSituationPosG,OnSituationNegG, Debogage, Sortie, Quitter, Relancer = handle_player_movement(posJoueurG, orientationG, GrilleAdminG, grilleJoueurG, tailleIG,tailleJG, SituationBool,Debogage)
@@ -363,8 +397,10 @@ def fonctionPrincipale():
                     Score = 0
                 print("Bravo"+nom+ "pour cette partie, Votre score est de: " + str(Score) + " !!")
                 #afficher resultat avec Histdebogage pris en compte
+                fonction_Sortie(nom, Score)
                 break
             if Quitter:
+                fonction_Quitter(GrilleAdminG, grilleJoueurG, Score, nom, posJoueurG, tailleIG, tailleJG, HistDebogage)
                 break
             if Relancer:
                 grilleJoueurG, GrilleAdminG, posJoueurG, tailleIG, tailleJG = initialiser_grille()
