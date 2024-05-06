@@ -8,8 +8,6 @@ from colorama import Back, Fore, Style, deinit, init
 from random import randint
 import random
 
-#test2
-#Fonction grille
 def initialiser_grille():
     tailleGrillei = random.randint(9, 19)
 
@@ -17,7 +15,7 @@ def initialiser_grille():
     GrilleJoueur = [[(Back.BLACK + " " + Style.RESET_ALL)] * (tailleGrillej) for _ in range(tailleGrillei)]
     positionJoueur = [random.randint(0,tailleGrillei-1), random.randint(0,tailleGrillej-1)]
     GrilleJoueur[positionJoueur[0]][positionJoueur[1]] = (Fore.RED + "▲" + Style.RESET_ALL) #on place le joueur
-    GrilleV1 = [[""] * tailleGrillej for _ in range(tailleGrillei)]
+    GrilleV1 = [[" "] * tailleGrillej for _ in range(tailleGrillei)]
     GrilleV1[positionJoueur[0]][positionJoueur[1]] =  (Fore.RED + "▲" + Style.RESET_ALL) #on place le joueur
     tailleSituation = int(0.025*tailleGrillej*tailleGrillei)
     tailleMur = int(0.1*tailleGrillej*tailleGrillei)
@@ -25,27 +23,27 @@ def initialiser_grille():
         while True:
             chiffreX = random.randint(0,tailleGrillei-1)
             chiffreY = random.randint(0,tailleGrillej-1)
-            if GrilleV1[chiffreX][chiffreY] == "":
+            if GrilleV1[chiffreX][chiffreY] == " ":
                 GrilleV1[chiffreX][chiffreY] = "P"
                 break
     for i in range(tailleSituation): #negatifs
         while True:
             chiffreX = random.randint(0,tailleGrillei-1)
             chiffreY = random.randint(0,tailleGrillej-1)
-            if GrilleV1[chiffreX][chiffreY] == "":
+            if GrilleV1[chiffreX][chiffreY] == " ":
                 GrilleV1[chiffreX][chiffreY] = "N"
                 break
     for i in range(tailleMur): #negatifs
         while True:
             chiffreX = random.randint(0,tailleGrillei-1)
             chiffreY = random.randint(0,tailleGrillej-1)
-            if GrilleV1[chiffreX][chiffreY] == "":
+            if GrilleV1[chiffreX][chiffreY] == " ":
                 GrilleV1[chiffreX][chiffreY] = "M"
                 break
     while True:
         chiffreX = random.randint(0, tailleGrillei-1)
         chiffreY = random.randint(0, tailleGrillej-1)
-        if GrilleV1[chiffreX][chiffreY] == "":
+        if GrilleV1[chiffreX][chiffreY] == " ":
             GrilleV1[chiffreX][chiffreY] = "S"
             break
     return GrilleJoueur, GrilleV1, positionJoueur, tailleGrillei-1, tailleGrillej-1
@@ -73,95 +71,132 @@ def afficher_menu():
     print("1. Jouer")
     print("2. Voir les règles")
     print("3. Quitter")
-    choix = input("Entrez votre choix : ")
-    return choix
+
 
 def afficher_regles():
     print("Règles du jeu :")
     # Ajouter ici les règles du jeu
     input("Appuyez sur Entrée pour revenir au menu principal...")
 
+
 def afficher_jeu():
 
     print("Save the Fish!")
-    print("Légende des cases")
-    print("Grille de jeu")
     grilleJ, GrilleAdmin, posJoueur, tailleI, tailleJ = initialiser_grille()
     afficher_grille(grilleJ)
-    print("Score actuel : [score]")
-    print("Indications pour le joueur")
+    print("Score actuel : 0")
     return grilleJ, GrilleAdmin, posJoueur, tailleI, tailleJ
 
 
-def handle_player_movement(player_position, orientation, grilleAdminF, grilleJoueurF, tailleIF, tailleJF, IsSituation):
+def handle_player_movement(player_position, orientation, grilleAdminF, grilleJoueurF, tailleIF, tailleJF, IsSituation, debogageF):
     key_pressed = input("choix i,j,k,l")
     print(key_pressed)
     IsMur = False
     OnSituationPos = False
     OnSituationNeg = False
+    SortieF = False
+    Quit = False
+    RelancerF = False
     if key_pressed == orientation:
         # déplacement
         if key_pressed == "i" and player_position[0] > 0 :
             if grilleAdminF[player_position[0] - 1][player_position[1]] == "M":
                 IsMur = True
             else:
-                if grilleAdminF[player_position[0]-1][player_position[1]] == "S":#distinction in et on
+                if grilleAdminF[player_position[0]-1][player_position[1]] == "P":#distinction in et on
                     OnSituationPos = True
-                    print("situation jouée")
+                    
                 elif grilleAdminF[player_position[0]-1][player_position[1]] == "N":
                     OnSituationNeg = True
+                    
                 player_position = [player_position[0] - 1, player_position[1]]
+                if grilleAdminF[player_position[0]][player_position[1]] == "S":
+                    SortieF = True
                 grilleJoueurF[player_position[0]][player_position[1]] = (Fore.RED + "▲")
-                grilleJoueurF[player_position[0] + 1][player_position[1]] = " "
+                grilleJoueurF[player_position[0] + 1][player_position[1]] = (Back.WHITE+" "+Style.RESET_ALL)
                 grilleAdminF[player_position[0]][player_position[1]] = (Fore.RED + "▲")
                 grilleAdminF[player_position[0] + 1][player_position[1]] = " "
-
+                if player_position[0] != 0:
+                    if grilleAdminF[player_position[0]-1][player_position[1]] == "P" or grilleAdminF[player_position[0]-1][player_position[1]] == "N":
+                        IsSituation = True
+                    else:
+                        IsSituation = False
+                else:
+                    IsSituation = False
         elif key_pressed == "j" and player_position[1] > 0:
             if grilleAdminF[player_position[0]][player_position[1] - 1] == "M":
                 IsMur = True
             else:
-                if grilleAdminF[player_position[0]][player_position[1]-1] == "S":  # distinction in et on
+                if grilleAdminF[player_position[0]][player_position[1]-1] == "P":  # distinction in et on
                     OnSituationPos = True
-                    print("situation jouée")
+                    
                 elif grilleAdminF[player_position[0]][player_position[1]-1] == "N":
                     OnSituationNeg = True
+                    
                 player_position = [player_position[0], player_position[1] - 1]
+                if grilleAdminF[player_position[0]][player_position[1]] == "S":
+                    SortieF = True
                 grilleJoueurF[player_position[0]][player_position[1]] = (Fore.RED + "◄")
-                grilleJoueurF[player_position[0]][player_position[1] + 1] = " "
+                grilleJoueurF[player_position[0]][player_position[1] + 1] = (Back.WHITE+" "+Style.RESET_ALL)
                 grilleAdminF[player_position[0]][player_position[1]] = (Fore.RED + "◄")
                 grilleAdminF[player_position[0]][player_position[1] + 1] = " "
+                if player_position[1] != 0:
+                    if grilleAdminF[player_position[0]][player_position[1]-1] == "P" or grilleAdminF[player_position[0]][player_position[1]-1] == "N":
+                        IsSituation = True
+                    else:
+                        IsSituation = False
+                else:
+                    IsSituation = False
 
-
-        elif key_pressed == "k" and player_position[0] < tailleIF-1:
+        elif key_pressed == "k" and player_position[0] < tailleIF:
             if grilleAdminF[player_position[0] + 1][player_position[1]] == "M":
                 IsMur = True
             else:
-                if grilleAdminF[player_position[0]+1][player_position[1]] == "S":  # distinction in et on
+                if grilleAdminF[player_position[0]+1][player_position[1]] == "P":  # distinction in et on
                     OnSituationPos = True
-                    print("situation jouée")
+                    
                 elif grilleAdminF[player_position[0]+1][player_position[1]] == "N":
                     OnSituationNeg = True
+                    
                 player_position = [player_position[0] + 1, player_position[1]]
+                if grilleAdminF[player_position[0]][player_position[1]] == "S":
+                    SortieF = True
                 grilleJoueurF[player_position[0]][player_position[1]] = (Fore.RED + "▼")
-                grilleJoueurF[player_position[0] - 1][player_position[1]] = " "
+                grilleJoueurF[player_position[0] - 1][player_position[1]] = (Back.WHITE+" "+Style.RESET_ALL)
                 grilleAdminF[player_position[0]][player_position[1]] = (Fore.RED + "▼")
                 grilleAdminF[player_position[0] - 1][player_position[1]] = " "
-
-
+                if player_position[0] != tailleIF:
+                    if grilleAdminF[player_position[0]+1][player_position[1]] == "P" or grilleAdminF[player_position[0]+1][player_position[1]] == "N":
+                        IsSituation = True
+                    else:
+                        IsSituation = False
+                else:
+                    IsSituation = False
         elif key_pressed == "l" and player_position[1] < tailleJF:
             if grilleAdminF[player_position[0]][player_position[1] + 1] == "M":
                 IsMur = True
             else:
-                if grilleAdminF[player_position[0]][player_position[1]+1] == "S":  # distinction in et on
+                if grilleAdminF[player_position[0]][player_position[1]+1] == "P":  # distinction in et on
                     OnSituationPos = True
-                    print("situation jouée")
+                    
                 elif grilleAdminF[player_position[0]][player_position[1]+1] == "N":
                     OnSituationNeg = True
+                    
                 player_position = [player_position[0], player_position[1] + 1]
+                if grilleAdminF[player_position[0]][player_position[1]] == "S":
+                    SortieF = True
                 grilleJoueurF[player_position[0]][player_position[1]] = (Fore.RED + "►")
-                grilleJoueurF[player_position[0]][player_position[1] - 1] = " "
+                grilleJoueurF[player_position[0]][player_position[1] - 1] = (Back.WHITE+" "+Style.RESET_ALL)
                 grilleAdminF[player_position[0]][player_position[1]] = (Fore.RED + "►")
                 grilleAdminF[player_position[0]][player_position[1] - 1] = " "
+                if player_position[1] != tailleJF:
+                    if grilleAdminF[player_position[0]][player_position[1]+1] == "P" or grilleAdminF[player_position[0]][player_position[1]+1] == "N":
+                        IsSituation = True
+                    else:
+                        IsSituation = False
+                else:
+                    IsSituation = False
+
 
     # orientation
     else:
@@ -181,7 +216,6 @@ def handle_player_movement(player_position, orientation, grilleAdminF, grilleJou
             grilleJoueurF[player_position[0]][player_position[1]] = (Fore.RED +"◄")
             if grilleAdminF[player_position[0]][player_position[1] - 1] == "P" or grilleAdminF[player_position[0]][
                 player_position[1] - 1] == "N":
-                # change la couleur du joueur
                 IsSituation = True
             else:
                 IsSituation = False
@@ -191,7 +225,6 @@ def handle_player_movement(player_position, orientation, grilleAdminF, grilleJou
             grilleJoueurF[player_position[0]][player_position[1]] = (Fore.RED + "▼")
             if grilleAdminF[player_position[0] + 1][player_position[1]] == "P" or grilleAdminF[player_position[0] + 1][
                 player_position[1]] == "N":
-                # change la couleur du joueur
                 IsSituation = True
             else:
                 IsSituation = False
@@ -205,13 +238,21 @@ def handle_player_movement(player_position, orientation, grilleAdminF, grilleJou
             else:
                 IsSituation = False
     orientation = key_pressed
-    return player_position, orientation, grilleJoueurF, grilleAdminF, IsSituation, IsMur, OnSituationPos, OnSituationNeg
-#FONCTIONS STOCKAGE
+    if IsSituation:
+        grilleJoueurF[player_position[0]][player_position[1]] = (Back.GREEN + grilleJoueurF[player_position[0]][player_position[1]]+ Style.RESET_ALL)
+        grilleAdminF[player_position[0]][player_position[1]] = (
+                Back.GREEN + grilleAdminF[player_position[0]][player_position[1]] + Style.RESET_ALL)
+    if key_pressed == "d" and debogageF == False:
+        debogageF = True
+    elif key_pressed == "d" and debogageF == True:
+        debogageF = False
+    if key_pressed == "q":
+        Quit = True
+    if key_pressed == "r":
+        RelancerF = True
+    return player_position, orientation, grilleJoueurF, grilleAdminF, IsSituation, IsMur, OnSituationPos, OnSituationNeg, debogageF, SortieF, Quit, RelancerF
 
-#fonctionOpenCSV: ouvrir un fichier csv et stocker son contenu
-    #entrée: nom du fichier 'exemple.csv' (String)
-    #sortie: variable avec le contenu (liste 1,2,3 ou ...n dimensions je crois dépendant du nombre de colonnes)
-import csv
+#FONCTIONS STOCKAGE
 
 def fonction_open_csv():
     contenu  = []
@@ -227,26 +268,11 @@ def fonction_open_csv():
             if contenu[i][0] == "Negative":
                 negative.append(contenu[i][1:-1])
     return positive, negative
-## appel : contenu = fonction_open_csv('exemple.csv')
-
-#fonctionOpenJSON: ouvrir un fichier json et stocker son contenu
-    #entrée: nom du fichier 'exemple.json' (String)
-    #sortie: variable avec le contenu (Dictionnaire)
-import json
 
 def fonction_open_json(nom_fichier):
     with open(nom_fichier, 'r') as json_file:
         contenu = json.load(json_file)
     return contenu
-## appel : contenu = fonction_open_json('exemple.json')
-
-#fonctionSaveCSV: stocke dans un fichier csv un contenu
-    #entrées:
-    # nom du fichier 'exemple.csv' (String)
-    # variable avec contenu organisé à stocker (liste)
-    #sortie: aucune (ou bool réussit ou non)
-
-
 
 def fonction_save_csv(nom_fichier, contenu):
     try:
@@ -268,47 +294,89 @@ def fonction_save_json(nom_fichier, contenu):
         print(f"Une erreur s'est produite : {e}")
         return False  # Échec de l'écriture dans le fichier
 
-def SelectionChoix(choix):
+
+def SelectionChoix():
     while True:
+        afficher_menu()
+        choix = input("Entrez votre choix : ")
         if choix == "1":
             grilleJ2, GrilleAdmin2, posJoueur2, tailleI1, tailleJ1 = afficher_jeu()
-            return grilleJ2, GrilleAdmin2, posJoueur2, tailleI1, tailleJ1
+            return grilleJ2, GrilleAdmin2, posJoueur2, tailleI1, tailleJ1, False
 
         elif choix == "2":
             afficher_regles()
-            break
         elif choix == "3":
-            break
+            return [0][0], [0][0], [0][0], 0, 0, True
         else:
             print("Choix invalide. Veuillez réessayer.")
 
 def fonctionPrincipale():
-    afficher_accueil()
-    choixP =afficher_menu()
-    grilleJoueurG, GrilleAdminG, posJoueurG, tailleIG, tailleJG = SelectionChoix(choixP)
-    orientationG = "i" #par défaut orienté vers le haut
-    SituationBool = False
+    Quitter= False
+    Sortie = False
     while True:
-        print(posJoueurG)
-        posJoueurG, orientationG, grilleJoueurG, GrilleAdminG,SituationBool, MurBool,OnSituationPosG,OnSituationNegG = handle_player_movement(posJoueurG, orientationG, GrilleAdminG, grilleJoueurG, tailleIG,tailleJG, SituationBool )
-        afficher_grille(GrilleAdminG)
-        if SituationBool:
-            print("en face d'une situation")
-        if MurBool:
-            print("attention un mur")
-        pos, neg = fonction_open_csv()
-        if OnSituationPosG:
-            randomInt = randint(0, len(pos)-1)
-            print("Situation positive: "+pos[randomInt][0])
-            print("Contenu de la situation: "+ pos[randomInt][1])
-            print("points obtenus: "+ pos[randomInt][2])
-            input("cliquez sur entrez: ")
-        elif OnSituationNegG:
-            randomInt = randint(0, len(neg) - 1)
-            print("Situation négative: " + neg[randomInt][0])
-            print("Contenu de la situation: " + neg[randomInt][1])
-            print("points peruds: " + neg[randomInt][2])
-            input("cliquez sur entrez: ")
+        if Quitter or Sortie:
+            pass #on enregistre les scores
+        afficher_accueil()
+
+        grilleJoueurG, GrilleAdminG, posJoueurG, tailleIG, tailleJG, BoolQuitter = SelectionChoix()
+        if BoolQuitter:
+            break
+        nom = input(" entrez votre pseudo puis cliquez enter: ")
+        orientationG = "i" #par défaut orienté vers le haut
+        SituationBool = False
+        Debogage = False
+        HistDebogage = False
+        Relancer = False
+        Score = 0
+        while True:
+            print(posJoueurG)
+            posJoueurG, orientationG, grilleJoueurG, GrilleAdminG,SituationBool, MurBool,OnSituationPosG,OnSituationNegG, Debogage, Sortie, Quitter, Relancer = handle_player_movement(posJoueurG, orientationG, GrilleAdminG, grilleJoueurG, tailleIG,tailleJG, SituationBool,Debogage)
+            if Debogage:
+                afficher_grille(GrilleAdminG)
+                HistDebogage = True
+            else:
+                afficher_grille(grilleJoueurG)
+            if SituationBool:
+                print("en face d'une situation")
+            if MurBool:
+                print("attention un mur")
+            print("Votre score est de: "+str(Score))
+            pos, neg = fonction_open_csv()
+            if OnSituationPosG:
+                randomInt = randint(0, len(pos)-1)
+                print("Situation positive: "+pos[randomInt][0])
+                print("Contenu de la situation: "+ pos[randomInt][1])
+                Score += int(pos[randomInt][2])
+                print("points obtenus: "+ pos[randomInt][2])
+                print("Score total: " + str(Score))
+                input("tapez ok puis enter: ")
+            elif OnSituationNegG:
+                randomInt = randint(0, len(neg) - 1)
+                print("Situation négative: " + neg[randomInt][0])
+                print("Contenu de la situation: " + neg[randomInt][1])
+                Score -= int(pos[randomInt][2])
+                print("points perdus: " + neg[randomInt][2])
+                print("Score total: " + str(Score))
+                input("tapez ok puis enter: ")
+            if Sortie:
+                if HistDebogage:
+                    Score = 0
+                print("Bravo"+nom+ "pour cette partie, Votre score est de: " + str(Score) + " !!")
+                #afficher resultat avec Histdebogage pris en compte
+                break
+            if Quitter:
+                break
+            if Relancer:
+                grilleJoueurG, GrilleAdminG, posJoueurG, tailleIG, tailleJG = initialiser_grille()
+                afficher_grille(grilleJoueurG)
+                SituationBool = False
+                Debogage = False
+                HistDebogage = False
+                Relancer = False
+                Score = 0
+
+
+
 
 
 fonctionPrincipale()
