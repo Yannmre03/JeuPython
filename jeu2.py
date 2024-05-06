@@ -1,9 +1,6 @@
 import readchar
-from readchar import readkey, key
-import os
-import json
 import csv
-from colorama import Back, Fore, Style, deinit, init
+from colorama import Back, Fore, Style
 from random import randint
 import random
 
