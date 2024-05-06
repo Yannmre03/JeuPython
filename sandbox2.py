@@ -1,19 +1,7 @@
 import csv
-
-
-def fonction_open_csv():
-    contenu  = []
-    positive = []
-    negative = []
-    with open("Situations.csv", newline='') as csvfile:
-        reader = csv.reader(csvfile)
-        for row in reader:
-            contenu.append(row)
-        for i in range(len(contenu)):
-            if contenu[i][0] == "Positive":
-                positive.append(contenu[i])
-            if contenu[i][0] == "Negative":
-                negative.append(contenu[i][1:-1])
-    return positive, negative
-pos, neg = fonction_open_csv()
-print(pos[0])
+DonneesPartie = []
+with open('PartieEnCours.csv', 'r', newline='') as csv_file:
+    reader = csv.reader(csv_file)
+    for row in reader:
+        DonneesPartie.append(row)
+print(len(DonneesPartie))
